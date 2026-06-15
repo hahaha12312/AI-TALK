@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI-TALK · AI 语音对话</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎙️ AI-TALK</h1>
+      <p class="subtitle">按住麦克风按钮说话，AI 会用语音回答你</p>
+    </header>
+
+    <div class="chat-window" id="chatWindow">
+      <div class="message ai">
+        <span class="avatar">🤖</span>
+        <div class="bubble">你好！我是 AI 语音助手，请按住下方按钮开始说话。</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button
+        id="recordBtn"
+        class="record-btn"
+        aria-label="按住录音"
+      >
+        <span class="mic-icon">🎤</span>
+        <span class="btn-label">按住说话</span>
+      </button>
+      <div class="status" id="status"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
