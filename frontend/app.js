@@ -1,4 +1,13 @@
-const API_BASE = "http://localhost:8000";
+// Derive backend URL from the current page's origin so it works in production.
+// When served via docker-compose (nginx on :3000, backend on :8000) the origin
+// is http://localhost:3000, but the backend lives on port 8000.
+// Override by setting window.AI_TALK_API before loading this script, e.g.:
+//   <script>window.AI_TALK_API = "https://api.example.com";</script>
+const API_BASE =
+  window.AI_TALK_API ||
+  (window.location.port === "3000"
+    ? `${window.location.protocol}//${window.location.hostname}:8000`
+    : window.location.origin);
 
 const chatBox = document.getElementById("chat-box");
 const recordBtn = document.getElementById("record-btn");
@@ -25,8 +34,7 @@ function setStatus(msg) {
 
 async function playAudioBase64(base64) {
   const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
   const blob = new Blob([bytes], { type: "audio/mpeg" });
   const url = URL.createObjectURL(blob);
   const audio = new Audio(url);

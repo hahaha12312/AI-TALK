@@ -1,5 +1,7 @@
 import os
 import io
+import json
+import base64
 from typing import List
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
@@ -111,8 +113,6 @@ def speak(req: SpeakRequest):
 @app.post("/api/voice-chat")
 async def voice_chat(audio: UploadFile = File(...), history: str = "[]"):
     """完整语音对话：音频 → 文字 → AI → 语音"""
-    import json
-
     # 1. 语音 → 文字
     audio_bytes = await audio.read()
     audio_file = io.BytesIO(audio_bytes)
@@ -160,8 +160,6 @@ async def voice_chat(audio: UploadFile = File(...), history: str = "[]"):
         audio_out = tts_response.content
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"TTS error: {exc}")
-
-    import base64
 
     return {
         "user_text": user_text,
