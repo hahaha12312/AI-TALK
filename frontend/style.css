@@ -1,0 +1,157 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f0f0f0;
+}
+
+.container {
+  width: 100%;
+  max-width: 680px;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+header {
+  text-align: center;
+}
+
+header h1 {
+  font-size: 2rem;
+  letter-spacing: 2px;
+}
+
+.subtitle {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+/* Chat window */
+.chat-window {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 16px;
+  height: 420px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chat-window::-webkit-scrollbar {
+  width: 4px;
+}
+.chat-window::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+  border-radius: 4px;
+}
+
+.message {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.message.user {
+  flex-direction: row-reverse;
+}
+
+.avatar {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.bubble {
+  max-width: 75%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.message.ai .bubble {
+  background: rgba(99, 102, 241, 0.35);
+  border-bottom-left-radius: 4px;
+}
+
+.message.user .bubble {
+  background: rgba(16, 185, 129, 0.35);
+  border-bottom-right-radius: 4px;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.record-btn {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  background: rgba(99, 102, 241, 0.5);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: transform 0.1s, background 0.2s, box-shadow 0.2s;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.record-btn:hover {
+  background: rgba(99, 102, 241, 0.7);
+}
+
+.record-btn.recording {
+  background: rgba(239, 68, 68, 0.7);
+  border-color: rgba(239, 68, 68, 0.8);
+  box-shadow: 0 0 0 10px rgba(239, 68, 68, 0.15),
+              0 0 0 20px rgba(239, 68, 68, 0.07);
+  animation: pulse 1s infinite;
+}
+
+.record-btn.loading {
+  background: rgba(251, 191, 36, 0.5);
+  cursor: not-allowed;
+}
+
+.mic-icon {
+  font-size: 2.2rem;
+}
+
+.btn-label {
+  font-size: 0.75rem;
+  color: #e0e0e0;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 10px rgba(239,68,68,0.15), 0 0 0 20px rgba(239,68,68,0.07); }
+  50%       { box-shadow: 0 0 0 14px rgba(239,68,68,0.2),  0 0 0 28px rgba(239,68,68,0.1);  }
+}
+
+.status {
+  font-size: 0.85rem;
+  color: #aaa;
+  min-height: 20px;
+  text-align: center;
+}
