@@ -6,8 +6,12 @@ import pygame
 
 # ==================== 配置中心 ====================
 # 优先从环境变量读取 API Key，也可直接在下方填写
-API_KEY = os.environ.get("OHMYGPT_API_KEY", "你的_OHMYGPT_API_KEY")
+API_KEY = os.environ.get("OHMYGPT_API_KEY", "")
 BASE_URL = os.environ.get("OHMYGPT_BASE_URL", "https://api.ohmygpt.com/v1")
+
+if not API_KEY:
+    print("[错误] 未检测到 API Key，请设置环境变量 OHMYGPT_API_KEY 后重试。")
+    sys.exit(1)
 
 # 模型选择（低配电脑推荐使用高性价比、响应极快的模型）
 CHAT_MODEL = "gpt-4o-mini"  # 响应速度极快，且非常便宜
@@ -49,7 +53,7 @@ def chat_with_ai(user_input):
     conversation_history.append({"role": "user", "content": user_input})
 
     # 限制记忆长度，防止低配电脑负担过重
-    if len(conversation_history) > MAX_HISTORY:
+    if len(conversation_history) > MAX_HISTORY + 1:
         # 保留系统提示词，移除最早的一轮对话
         conversation_history = [conversation_history[0]] + conversation_history[-MAX_HISTORY:]
 

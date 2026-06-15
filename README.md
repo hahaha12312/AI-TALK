@@ -22,7 +22,7 @@ pip install -r requirements.txt
 
 ## 配置
 
-**推荐方式：使用环境变量（避免将密钥提交到代码库）**
+**使用环境变量设置 API Key（推荐，避免将密钥提交到代码库）**
 
 ```bash
 export OHMYGPT_API_KEY="你的_API_KEY"
@@ -30,13 +30,7 @@ export OHMYGPT_API_KEY="你的_API_KEY"
 export OHMYGPT_BASE_URL="https://api.ohmygpt.com/v1"
 ```
 
-**备用方式：直接编辑 `ai_talk.py`**
-
-打开 `ai_talk.py`，将第 9 行的占位符替换为你的真实 API Key：
-
-```python
-API_KEY = os.environ.get("OHMYGPT_API_KEY", "你的_OHMYGPT_API_KEY")
-```
+> ⚠️ 程序启动时若未检测到 `OHMYGPT_API_KEY` 环境变量，将直接退出并提示错误。
 
 ## 运行
 
