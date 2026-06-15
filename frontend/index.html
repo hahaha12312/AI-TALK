@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI-TALK — AI 语音对话</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🎙️ AI-TALK</h1>
+    <p class="subtitle">AI 语音对话助手</p>
+
+    <div id="chat-box" class="chat-box"></div>
+
+    <div class="controls">
+      <button id="record-btn" class="btn btn-record">
+        <span class="btn-icon">🎤</span>
+        <span class="btn-label">按住说话</span>
+      </button>
+      <div id="status" class="status">准备就绪</div>
+    </div>
+
+    <div class="text-input-row">
+      <input
+        id="text-input"
+        type="text"
+        placeholder="或直接输入文字…"
+        autocomplete="off"
+      />
+      <button id="send-btn" class="btn btn-send">发送</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
