@@ -1,5 +1,6 @@
 """FastAPI 后端：STT（Whisper）+ 带人格/情绪/记忆的对话 + 富情感 TTS。"""
 import io
+import logging
 from typing import Optional
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
@@ -13,6 +14,8 @@ from emotion import EmotionState
 from engine import DialogueEngine
 from memory import get_session
 from persona import Persona
+
+logger = logging.getLogger("ai-talk")
 
 app = FastAPI(title="AI-TALK", description="更像真人的 AI 语音对话", version="1.0.0")
 
@@ -182,4 +185,6 @@ async def voice_chat(
 
 @app.exception_handler(Exception)
 async def unhandled(request, exc):  # noqa: ANN001
-    return JSONResponse(status_code=500, content={"error": str(exc)})
+    # 记录完整堆栈到服务端日志，但不向客户端暴露内部错误细节
+    logger.exception("Unhandled error on %s", getattr(request, "url", ""))
+    return JSONResponse(status_code=500, content={"error": "服务器内部错误"})

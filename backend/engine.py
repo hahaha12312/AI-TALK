@@ -1,11 +1,14 @@
 """对话引擎：整合人格、情绪、记忆，生成带情绪的回复。"""
 import json
+import logging
 from typing import Any, Dict, List, Tuple
 
 import config
 from emotion import EmotionState, infer_user_emotion
 from memory import ConversationMemory
 from persona import Persona
+
+logger = logging.getLogger("ai-talk.engine")
 
 # 让模型在回复的同时输出情绪标签的结构化定义
 _EMOTION_TOOL = {
@@ -105,8 +108,9 @@ class DialogueEngine:
                 if delta:
                     full.append(delta)
                     yield delta
-        except Exception as exc:  # noqa: BLE001
-            yield f"（出错了：{exc}）"
+        except Exception:  # noqa: BLE001
+            logger.exception("respond_stream failed")
+            yield "（抱歉，我这边出了点问题，稍后再聊好吗～）"
 
         reply = "".join(full).strip()
         emo_label = infer_user_emotion(user_text)
