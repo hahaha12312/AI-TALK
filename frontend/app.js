@@ -72,24 +72,60 @@ async function loadPersona() {
   }
 }
 
-// ── 文字对话 ──────────────────────────────────────────────────────────
+// ── 文字对话（流式）──────────────────────────────────────────────────
 async function sendText(text) {
   addBubble(text, "user");
   setStatus("思考中…");
+  stopPlayback(); // barge-in：发新消息时打断上一条播放
+  const bubble = addBubble("", "ai");
+  let full = "";
   try {
-    const res = await fetch(`${API_BASE}/api/chat`, {
+    const res = await fetch(`${API_BASE}/api/chat-stream`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text, session_id: SESSION_ID }),
     });
-    if (!res.ok) throw new Error(await res.text());
-    const data = await res.json();
-    addBubble(data.reply, "ai");
-    setEmotion(data.emotion, data.intensity);
-    await speak(data.reply);
+    if (!res.ok || !res.body) throw new Error(await res.text());
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const parts = buffer.split("\n\n");
+      buffer = parts.pop() || "";
+      for (const part of parts) {
+        const line = part.trim();
+        if (!line.startsWith("data:")) continue;
+        const payload = JSON.parse(line.slice(5).trim());
+        if (payload.delta) {
+          full += payload.delta;
+          bubble.textContent = full;
+          chat.scrollTop = chat.scrollHeight;
+        }
+        if (payload.done) setEmotion(payload.emotion, payload.intensity);
+      }
+    }
     setStatus("");
+    if (full) await speak(full);
   } catch (e) {
-    setStatus("出错了：" + e.message);
+    // 流式失败则回退到普通对话
+    try {
+      const res = await fetch(`${API_BASE}/api/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, session_id: SESSION_ID }),
+      });
+      const data = await res.json();
+      bubble.textContent = data.reply;
+      setEmotion(data.emotion, data.intensity);
+      await speak(data.reply);
+      setStatus("");
+    } catch (err) {
+      setStatus("出错了：" + err.message);
+    }
   }
 }
 
@@ -113,21 +149,83 @@ async function speak(text) {
 // ── 语音对话（录音 → 后端一条龙）────────────────────────────────────
 let mediaRecorder = null;
 let chunks = [];
+// VAD 相关
+let audioCtx = null;
+let vadRafId = null;
+let silenceStart = 0;
+const SILENCE_THRESHOLD = 0.012; // 均方根音量阈值
+const SILENCE_DURATION = 1200; // 静音多久后自动停止(ms)
+
+function stopPlayback() {
+  // 打断(barge-in)：用户开始说话时立即停止 AI 播放
+  if (player && !player.paused) {
+    player.pause();
+    player.currentTime = 0;
+  }
+}
+
+function startVAD(stream) {
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioCtx.createMediaStreamSource(stream);
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 512;
+    source.connect(analyser);
+    const data = new Uint8Array(analyser.fftSize);
+    silenceStart = 0;
+
+    const tick = () => {
+      analyser.getByteTimeDomainData(data);
+      let sum = 0;
+      for (let i = 0; i < data.length; i++) {
+        const v = (data[i] - 128) / 128;
+        sum += v * v;
+      }
+      const rms = Math.sqrt(sum / data.length);
+      const now = performance.now();
+      if (rms < SILENCE_THRESHOLD) {
+        if (silenceStart === 0) silenceStart = now;
+        else if (now - silenceStart > SILENCE_DURATION) {
+          stopRecording(); // 自动断句
+          return;
+        }
+      } else {
+        silenceStart = 0; // 有声音，重置
+      }
+      vadRafId = requestAnimationFrame(tick);
+    };
+    vadRafId = requestAnimationFrame(tick);
+  } catch (e) {
+    /* VAD 不可用时忽略，仍可手动松开发送 */
+  }
+}
+
+function stopVAD() {
+  if (vadRafId) cancelAnimationFrame(vadRafId);
+  vadRafId = null;
+  if (audioCtx) {
+    audioCtx.close().catch(() => {});
+    audioCtx = null;
+  }
+}
 
 async function startRecording() {
+  stopPlayback(); // barge-in
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     mediaRecorder = new MediaRecorder(stream);
     chunks = [];
     mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
     mediaRecorder.onstop = () => {
+      stopVAD();
       stream.getTracks().forEach((t) => t.stop());
       handleAudio(new Blob(chunks, { type: "audio/webm" }));
     };
     mediaRecorder.start();
+    startVAD(stream);
     recordBtn.classList.add("recording");
     recordBtn.textContent = "🔴 松开发送";
-    setStatus("录音中…");
+    setStatus("录音中…（静音自动结束）");
   } catch (e) {
     setStatus("无法访问麦克风：" + e.message);
   }

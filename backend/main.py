@@ -121,6 +121,30 @@ def chat(req: ChatRequest):
     return _chat(req.text, req.session_id)
 
 
+@app.post("/api/chat-stream")
+def chat_stream(req: ChatRequest):
+    """流式对话（SSE）。逐段返回文本增量，结束时发送情绪。"""
+    if not req.text.strip():
+        raise HTTPException(400, "text 不能为空")
+    client = get_client()
+    memory = get_session(req.session_id, client)
+    emotion = get_emotion(req.session_id)
+
+    def event_gen():
+        import json as _json
+
+        for delta in _engine.respond_stream(memory, emotion, req.text):
+            yield f"data: {_json.dumps({'delta': delta}, ensure_ascii=False)}\n\n"
+        done = {
+            "done": True,
+            "emotion": emotion.label,
+            "intensity": round(emotion.intensity, 2),
+        }
+        yield f"data: {_json.dumps(done, ensure_ascii=False)}\n\n"
+
+    return StreamingResponse(event_gen(), media_type="text/event-stream")
+
+
 @app.post("/api/speak")
 def speak(req: SpeakRequest):
     if not req.text.strip():

@@ -83,6 +83,39 @@ class DialogueEngine:
 
         return reply, emotion
 
+    def respond_stream(
+        self, memory: ConversationMemory, emotion: EmotionState, user_text: str
+    ):
+        """流式生成回复。逐段 yield 文本增量，结束后更新情绪与记忆。
+
+        流式模式下不走 function-calling 结构化情绪，改为用用户文本兜底推断情绪，
+        以换取更低的首字延迟。
+        """
+        messages = self._build_messages(memory, emotion, user_text)
+        full = []
+        try:
+            stream = self.client.chat.completions.create(
+                model=config.CHAT_MODEL,
+                messages=messages,
+                temperature=0.9,
+                stream=True,
+            )
+            for chunk in stream:
+                delta = chunk.choices[0].delta.content or ""
+                if delta:
+                    full.append(delta)
+                    yield delta
+        except Exception as exc:  # noqa: BLE001
+            yield f"（出错了：{exc}）"
+
+        reply = "".join(full).strip()
+        emo_label = infer_user_emotion(user_text)
+        emotion.update(emo_label, 0.5)
+        memory.add_turn("user", user_text)
+        memory.add_turn("assistant", reply)
+        if memory.needs_compaction():
+            memory.compact()
+
     def _call_model(self, messages: List[Dict[str, str]]) -> Tuple[str, str, float]:
         try:
             resp = self.client.chat.completions.create(
