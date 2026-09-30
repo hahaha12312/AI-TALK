@@ -3,7 +3,11 @@ const API_BASE = window.API_BASE || "http://localhost:8000";
 const SESSION_ID =
   localStorage.getItem("ai_talk_session") ||
   (() => {
-    const id = "s_" + Math.random().toString(36).slice(2, 10);
+    const id =
+      "s_" +
+      (crypto.randomUUID
+        ? crypto.randomUUID()
+        : crypto.getRandomValues(new Uint32Array(2)).join(""));
     localStorage.setItem("ai_talk_session", id);
     return id;
   })();
