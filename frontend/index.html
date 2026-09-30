@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI-TALK · AI 语音陪伴</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="avatar" id="avatar">🙂</div>
+      <div class="title">
+        <h1 id="personaName">AI-TALK</h1>
+        <p id="personaTag">正在连接…</p>
+      </div>
+      <div class="emotion-badge" id="emotionBadge">情绪：—</div>
+    </header>
+
+    <main class="chat" id="chat"></main>
+
+    <footer class="controls">
+      <button id="recordBtn" class="record-btn">🎤 按住说话</button>
+      <div class="text-input">
+        <input id="textInput" type="text" placeholder="也可以直接打字…" />
+        <button id="sendBtn">发送</button>
+      </div>
+      <div class="status" id="status"></div>
+    </footer>
+  </div>
+
+  <audio id="player"></audio>
+  <script src="app.js"></script>
+</body>
+</html>
