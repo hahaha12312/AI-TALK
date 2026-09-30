@@ -103,11 +103,16 @@ python -m http.server 3000
 | `/api/voice-chat` | POST | 完整语音对话（音频→文字→AI→语音，情绪写入响应头） |
 | `/api/transcribe` | POST | 仅语音转文字 |
 | `/api/chat` | POST | 仅文字对话（返回回复 + 情绪 + 强度） |
+| `/api/chat-stream` | POST | 流式文字对话（SSE，逐字返回） |
 | `/api/speak` | POST | 仅文字转语音（按当前情绪调节语气） |
 | `/api/persona` | GET | 当前角色信息 |
 | `/health` | GET | 健康检查 |
 
 ## 🖥️ 部署到 PC 端
 
-- **桌面壳**：可用 Tauri / Electron 把 `frontend/` 打包为 Windows/macOS/Linux 桌面 App，后端以 sidecar 子进程随行启动。
+- **桌面壳（已内置脚手架）**：`desktop/` 提供 Tauri 工程，可把 `frontend/` 打包为 Windows/macOS/Linux 桌面 App，后端可以 sidecar 子进程随行启动。详见 `desktop/README.md`。
 - **本地一体化（隐私优先）**：把云 API 替换为本地模型（faster-whisper + Ollama + 本地 TTS），后端用 PyInstaller 打包为单可执行文件。
+
+## 🤝 交接 / 状态
+
+项目当前状态、架构、未完成工作与后续建议见 [`HANDOFF.md`](HANDOFF.md)。

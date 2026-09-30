@@ -1,0 +1,15 @@
+[package]
+name = "ai-talk"
+version = "1.0.0"
+description = "更像真人的 AI 语音对话桌面端"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-shell = "2.2.1"
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]
